@@ -6,11 +6,11 @@ services:
     container_name: minio
     restart: unless-stopped
 
-    # Portas expostas apenas para localhost
+    # Portas expostas para a rede local
     # O acesso externo é via Nginx Proxy Manager (NPM)
     ports:
-      - "127.0.0.1:9000:9000" # API S3
-      - "127.0.0.1:9001:9001" # Console Web
+      - "9000:9000" # API S3
+      - "9001:9001" # Console Web
 
     environment:
       # Credenciais (gerenciadas via secrets do GitHub)
