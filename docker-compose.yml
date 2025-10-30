@@ -1,0 +1,51 @@
+version: '3.9'
+
+services:
+  minio:
+    image: minio/minio:latest
+    container_name: minio
+    restart: unless-stopped
+
+    # Portas expostas apenas para localhost
+    # O acesso externo é via Nginx Proxy Manager (NPM)
+    ports:
+      - "127.0.0.1:9000:9000" # API S3
+      - "127.0.0.1:9001:9001" # Console Web
+
+    environment:
+      # Credenciais (gerenciadas via secrets do GitHub)
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
+
+      # URLs públicas (configuradas via NPM)
+      MINIO_SERVER_URL: ${MINIO_SERVER_URL:-https://api-minio.labtecs.com.br}
+      MINIO_BROWSER_REDIRECT_URL: ${MINIO_BROWSER_REDIRECT_URL:-https://minio.labtecs.com.br}
+
+      # Região
+      MINIO_REGION_NAME: ${MINIO_REGION_NAME:-us-east-1}
+
+    volumes:
+      # Dados persistentes
+      - ./data:/data
+
+    command: server /data --console-address ":9001"
+
+    networks:
+      - nginx_proxy
+
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:9000/minio/health/live" ]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+      start_period: 10s
+
+    labels:
+      # Labels para identificação
+      - "com.labtecs.app=minio"
+      - "com.labtecs.environment=production"
+      - "com.labtecs.managed-by=github-actions"
+
+networks:
+  nginx_proxy:
+    external: true

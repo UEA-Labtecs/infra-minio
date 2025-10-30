@@ -1,0 +1,101 @@
+name: Deploy MinIO
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:  # Permite deploy manual
+
+jobs:
+  deploy:
+    name: Deploy to Server
+    runs-on: self-hosted
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Ensure Docker network exists
+        run: |
+          if ! docker network inspect nginx_proxy >/dev/null 2>&1; then
+            echo "📡 Creating nginx_proxy network..."
+            docker network create nginx_proxy
+            echo "✅ Network nginx_proxy created"
+          else
+            echo "✅ Network nginx_proxy already exists"
+          fi
+      
+      - name: Create data directory
+        run: |
+          mkdir -p data
+      
+      - name: Create .env file
+        run: |
+          cat > .env << EOF
+          MINIO_ROOT_USER=${{ secrets.MINIO_ROOT_USER }}
+          MINIO_ROOT_PASSWORD=${{ secrets.MINIO_ROOT_PASSWORD }}
+          MINIO_SERVER_URL=${{ secrets.MINIO_SERVER_URL }}
+          MINIO_BROWSER_REDIRECT_URL=${{ secrets.MINIO_BROWSER_REDIRECT_URL }}
+          MINIO_REGION_NAME=${{ secrets.MINIO_REGION_NAME }}
+          EOF
+      
+      - name: Stop existing MinIO
+        run: |
+          docker-compose down || true
+        continue-on-error: true
+      
+      - name: Start MinIO
+        run: |
+          docker-compose up -d
+      
+      - name: Wait for MinIO to start
+        run: sleep 15
+      
+      - name: Verify MinIO is running
+        run: |
+          if docker ps | grep -q minio; then
+            echo "✅ MinIO está rodando"
+            docker ps --filter name=minio
+            echo ""
+            echo "Últimas 20 linhas do log:"
+            docker logs --tail 20 minio
+          else
+            echo "❌ MinIO não está rodando"
+            docker logs minio
+            exit 1
+          fi
+      
+      - name: Health check
+        run: |
+          echo "Verificando health endpoint..."
+          for i in {1..10}; do
+            if curl -sf http://localhost:9000/minio/health/live > /dev/null 2>&1; then
+              echo "✅ MinIO health check OK"
+              exit 0
+            fi
+            echo "Tentativa $i/10..."
+            sleep 2
+          done
+          echo "❌ Health check falhou"
+          exit 1
+      
+      - name: Deployment Summary
+        if: success()
+        run: |
+          echo "🚀 Deploy do MinIO realizado com sucesso!"
+          echo ""
+          echo "📦 Container: minio"
+          echo "🔨 Commit: ${{ github.sha }}"
+          echo "👤 Author: ${{ github.actor }}"
+          echo ""
+          echo "Portas:"
+          echo "  - API S3: 9000"
+          echo "  - Console: 9001"
+          echo ""
+          echo "URLs (via NPM):"
+          echo "  - API: ${{ secrets.MINIO_SERVER_URL }}"
+          echo "  - Console: ${{ secrets.MINIO_BROWSER_REDIRECT_URL }}"
+          echo ""
+          echo "Container status:"
+          docker ps --filter name=minio --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+
