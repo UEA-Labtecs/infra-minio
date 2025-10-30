@@ -18,8 +18,8 @@ services:
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
 
       # URLs públicas (configuradas via NPM)
-      MINIO_SERVER_URL: ${MINIO_SERVER_URL:-https://api-minio.labtecs.com.br}
-      MINIO_BROWSER_REDIRECT_URL: ${MINIO_BROWSER_REDIRECT_URL:-https://minio.labtecs.com.br}
+      MINIO_SERVER_URL: ${MINIO_SERVER_URL:-http://api-minio.labtecs.com.br}
+      MINIO_BROWSER_REDIRECT_URL: ${MINIO_BROWSER_REDIRECT_URL:-http://minio.labtecs.com.br}
 
       # Região
       MINIO_REGION_NAME: ${MINIO_REGION_NAME:-us-east-1}
