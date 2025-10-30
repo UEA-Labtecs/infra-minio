@@ -13,16 +13,18 @@ services:
       - "9001:9001" # Console Web
 
     environment:
-      # Credenciais (gerenciadas via secrets do GitHub)
-      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
-      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
+      # Credenciais (alinhadas com api-sgpi)
+      # MINIO_ROOT_USER = MINIO_ACCESS_KEY (usado pela api-sgpi)
+      # MINIO_ROOT_PASSWORD = MINIO_SECRET_KEY (usado pela api-sgpi)
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
 
       # URLs públicas (configuradas via NPM)
-      MINIO_SERVER_URL: ${MINIO_SERVER_URL:-http://api-minio.labtecs.com.br}
-      MINIO_BROWSER_REDIRECT_URL: ${MINIO_BROWSER_REDIRECT_URL:-http://minio.labtecs.com.br}
+      MINIO_SERVER_URL: http://api-minio.labtecs.com.br
+      MINIO_BROWSER_REDIRECT_URL: http://minio.labtecs.com.br
 
       # Região
-      MINIO_REGION_NAME: ${MINIO_REGION_NAME:-us-east-1}
+      MINIO_REGION_NAME: us-east-1
 
     volumes:
       # Dados persistentes

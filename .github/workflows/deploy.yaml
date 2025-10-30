@@ -42,15 +42,9 @@ jobs:
         run: |
           mkdir -p data
       
-      - name: Create .env file
-        run: |
-          cat > .env << EOF
-          MINIO_ROOT_USER=${{ secrets.MINIO_ROOT_USER }}
-          MINIO_ROOT_PASSWORD=${{ secrets.MINIO_ROOT_PASSWORD }}
-          MINIO_SERVER_URL=${{ secrets.MINIO_SERVER_URL }}
-          MINIO_BROWSER_REDIRECT_URL=${{ secrets.MINIO_BROWSER_REDIRECT_URL }}
-          MINIO_REGION_NAME=${{ secrets.MINIO_REGION_NAME }}
-          EOF
+      # Credenciais agora estão fixas no docker-compose.yml (alinhadas com api-sgpi)
+      # MINIO_ROOT_USER = minioadmin
+      # MINIO_ROOT_PASSWORD = minioadmin
       
       - name: Stop existing MinIO
         run: |
