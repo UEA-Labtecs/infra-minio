@@ -20,8 +20,10 @@ services:
       MINIO_ROOT_PASSWORD: minioadmin
 
       # URLs públicas (configuradas via NPM)
-      MINIO_SERVER_URL: http://api-minio.labtecs.com.br
-      MINIO_BROWSER_REDIRECT_URL: http://minio.labtecs.com.br
+      # IMPORTANTE: Essas URLs devem corresponder EXATAMENTE ao que está configurado no NPM
+      # Se usar HTTP no NPM, mantenha http:// aqui
+      MINIO_SERVER_URL: http://localhost:9000
+      MINIO_BROWSER_REDIRECT_URL: http://localhost:9001
 
       # Região
       MINIO_REGION_NAME: us-east-1
